@@ -1,11 +1,10 @@
-import { HasAnyAuthorityDirective } from './has-any-authority.directive';
 import { Component, Injectable } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { SgiAuthService, IAuthStatus, defaultAuthStatus } from '../auth.service';
 import { By } from '@angular/platform-browser';
 import { Observable } from 'rxjs';
-import { LoggerTestingModule } from 'ngx-logger/testing';
+import { defaultAuthStatus, IAuthStatus, SgiAuthService } from '../auth.service';
 import { SgiAuthConfig } from '../public-api';
+import { HasAnyAuthorityDirective } from './has-any-authority.directive';
 
 @Component({
   template: '',
@@ -50,7 +49,7 @@ describe('HasAnyAuthorityDirective', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [LoggerTestingModule],
+      imports: [],
       declarations: [TestComponent, HasAnyAuthorityDirective],
       providers: [{ provide: SgiAuthService, useClass: MockAuthService }]
     });

@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { SgiAuthService, IAuthStatus, defaultAuthStatus } from './auth.service';
-import { Observable, of } from 'rxjs';
-import { NGXLogger } from 'ngx-logger';
 import { Router } from '@angular/router';
+import { Observable, of } from 'rxjs';
 import { SgiAuthConfig } from './auth.config';
+import { defaultAuthStatus, IAuthStatus, SgiAuthService } from './auth.service';
 
 /**
  * InMemory authentication service implementation
@@ -15,8 +14,8 @@ export class AuthInMemoryService extends SgiAuthService {
   private authorities: string[];
   private defaultAuthStatus: IAuthStatus;
 
-  constructor(protected logger: NGXLogger, private router: Router) {
-    super(logger);
+  constructor(private router: Router) {
+    super();
   }
 
   init(authConfig: SgiAuthConfig): Observable<boolean> {

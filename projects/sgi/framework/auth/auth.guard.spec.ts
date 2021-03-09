@@ -2,7 +2,6 @@ import { SgiAuthGuard } from './auth.guard';
 
 import { TestBed } from '@angular/core/testing';
 import { Router, ActivatedRouteSnapshot } from '@angular/router';
-import { LoggerTestingModule } from 'ngx-logger/testing';
 import { of, Observable, throwError } from 'rxjs';
 import { SgiAuthRouteData, SgiAuthRoute } from './auth.route';
 import { SgiAuthService } from './auth.service';
@@ -21,7 +20,7 @@ describe('CanAuthenticationGuard', () => {
   beforeEach(() => {
     const authServiceSpy = jasmine.createSpyObj('AuthService', ['isAuthenticated', 'login', 'hasAuthority', 'hasAnyAuthority', 'hasAuthorityForAnyUO', 'hasAnyAuthorityForAnyUO']);
     TestBed.configureTestingModule({
-      imports: [LoggerTestingModule],
+      imports: [],
       providers: [
         { provide: Router, useValue: routeMock },
         { provide: SgiAuthService, useValue: authServiceSpy }

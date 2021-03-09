@@ -1,8 +1,6 @@
-import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { LoggerTestingModule } from 'ngx-logger/testing';
-import { NGXLogger } from 'ngx-logger';
 import { HttpClient } from '@angular/common/http';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
 import { SgiBaseConverter } from '@sgi/framework/core';
 import { SgiReadOnlyMutableRestService } from './read-only-mutable.rest.service';
 
@@ -42,8 +40,8 @@ class DummyDataConverter extends SgiBaseConverter<DummyDataSource, DummyDataTarg
 }
 
 class FakeService extends SgiReadOnlyMutableRestService<number, DummyDataSource, DummyDataTarget> {
-  constructor(logger: NGXLogger, http: HttpClient) {
-    super(FakeService.name, logger, fakeEndpoint, http, new DummyDataConverter());
+  constructor(http: HttpClient) {
+    super(FakeService.name, fakeEndpoint, http, new DummyDataConverter());
   }
 }
 
@@ -66,9 +64,9 @@ describe('SgiReadOnlyMutableRestService', () => {
   let httpMock: HttpTestingController;
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, LoggerTestingModule]
+      imports: [HttpClientTestingModule]
     });
-    service = new FakeService(TestBed.inject(NGXLogger), TestBed.inject(HttpClient));
+    service = new FakeService(TestBed.inject(HttpClient));
     httpMock = TestBed.inject(HttpTestingController);
   });
 

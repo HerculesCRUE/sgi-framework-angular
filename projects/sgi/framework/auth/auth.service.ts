@@ -1,9 +1,8 @@
-import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { NGXLogger } from 'ngx-logger';
-import { SgiAuthConfig } from './auth.config';
 import { HttpRequest } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { hasAnyAuthority, hasAnyAuthorityForAnyUO, hasAnyModuleAccess, hasAuthority, hasAuthorityForAnyUO, hasModuleAccess } from './auth.authority';
+import { SgiAuthConfig } from './auth.config';
 
 export interface IAuthService {
   /**
@@ -111,7 +110,7 @@ export abstract class SgiAuthService implements IAuthService {
 
   protected protectedResources: RegExp[] = [];
 
-  constructor(protected logger: NGXLogger) { }
+  constructor() { }
 
   abstract init(authConfig: SgiAuthConfig): Observable<boolean>;
   abstract getToken(): Observable<string>;

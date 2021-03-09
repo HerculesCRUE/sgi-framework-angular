@@ -1,11 +1,10 @@
-import { HasAnyAuthorityForAnyUODirective } from './has-any-authority-for-any-uo.directive';
 import { Component, Injectable } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { SgiAuthService, IAuthStatus, defaultAuthStatus } from '../auth.service';
-import { Observable } from 'rxjs';
 import { By } from '@angular/platform-browser';
+import { Observable } from 'rxjs';
 import { SgiAuthConfig } from '../auth.config';
-import { LoggerTestingModule } from 'ngx-logger/testing';
+import { defaultAuthStatus, IAuthStatus, SgiAuthService } from '../auth.service';
+import { HasAnyAuthorityForAnyUODirective } from './has-any-authority-for-any-uo.directive';
 
 @Component({
   template: '',
@@ -50,7 +49,7 @@ describe('HasAnyAuthorityForAnyUODirective', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [LoggerTestingModule],
+      imports: [],
       declarations: [TestComponent, HasAnyAuthorityForAnyUODirective],
       providers: [{ provide: SgiAuthService, useClass: MockAuthService }]
     });

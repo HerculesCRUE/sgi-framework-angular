@@ -1,11 +1,10 @@
-import { HttpTestingController, HttpClientTestingModule } from '@angular/common/http/testing';
-import { TestBed, async } from '@angular/core/testing';
-import { SgiAuthHttpInterceptor } from './auth-http-interceptor';
-import { LoggerTestingModule } from 'ngx-logger/testing';
 import { HttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { SgiAuthService } from './auth.service';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
+import { SgiAuthHttpInterceptor } from './auth-http-interceptor';
+import { SgiAuthService } from './auth.service';
 
 const fakeEndpoint = 'http://localhost:8080/fake';
 
@@ -14,10 +13,10 @@ describe(`AuthHttpInterceptor`, () => {
   let httpMock: HttpTestingController;
   let authServiceMock: jasmine.SpyObj<SgiAuthService>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     const authServiceSpy = jasmine.createSpyObj('AuthService', ['getToken', 'isAuthenticated', 'isProtectedRequest']);
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, LoggerTestingModule, RouterTestingModule],
+      imports: [HttpClientTestingModule, RouterTestingModule],
       providers: [
         {
           provide: HTTP_INTERCEPTORS,

@@ -1,7 +1,6 @@
-import { SgiReadOnlyMutableRestService } from './read-only-mutable.rest.service';
-import { NGXLogger } from 'ngx-logger';
 import { HttpClient } from '@angular/common/http';
 import { SgiNoConversionConverter } from '@sgi/framework/core';
+import { SgiReadOnlyMutableRestService } from './read-only-mutable.rest.service';
 
 /**
  * Base service to consume REST endpoints of read only entites without transformation
@@ -12,7 +11,7 @@ import { SgiNoConversionConverter } from '@sgi/framework/core';
  * @template T type of return element
  */
 export class SgiReadOnlyRestService<K extends number | string, T> extends SgiReadOnlyMutableRestService<K, T, T> {
-  constructor(serviceName: string, logger: NGXLogger, endpointUrl: string, http: HttpClient) {
-    super(serviceName, logger, endpointUrl, http, new SgiNoConversionConverter<T, T>());
+  constructor(serviceName: string, endpointUrl: string, http: HttpClient) {
+    super(serviceName, endpointUrl, http, new SgiNoConversionConverter<T, T>());
   }
 }

@@ -10,7 +10,7 @@
       "prefix": "sgi",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-ng-packagr:build",
+          "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
             "tsConfig": "projects/sgi/framework/tsconfig.lib.json",
             "project": "projects/sgi/framework/ng-package.json"

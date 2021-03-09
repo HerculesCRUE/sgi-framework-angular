@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router, CanActivate } from '@angular/router';
-import { SgiAuthService } from './auth.service';
-import { map, catchError, tap } from 'rxjs/operators';
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { hasAuthorityForAnyUO, hasAnyAuthorityForAnyUO, hasAuthority, hasAnyAuthority } from './auth.authority';
-import { NGXLogger } from 'ngx-logger';
+import { catchError, map } from 'rxjs/operators';
 import { SgiAuthRouteData } from './auth.route';
+import { SgiAuthService } from './auth.service';
 
 
 
@@ -34,36 +32,31 @@ enum GuardMode {
   providedIn: 'root'
 })
 export class SgiAuthGuard implements CanActivate {
-  constructor(protected router: Router, protected authService: SgiAuthService, protected logger: NGXLogger) {
+  constructor(protected router: Router, protected authService: SgiAuthService) {
 
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
     boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
 
-    this.logger.debug(`canActivate(${route.toString()}) - START`);
     if (!this.authService.isAuthenticated()) {
-      this.logger.warn(`not logged in`);
       // Because login do a redict an capture the current url, we need to provide the route target url.
       // When the auth succes, the user is returned to target url and then authorizations are checked.
       return this.authService.login(state.url).pipe(
         catchError(async (error) => {
-          this.logger.error(error);
+          console.error(JSON.stringify(error));
           return false;
         }),
         map((error) => {
           // Error calling login
           let success: boolean;
           if (typeof error === 'boolean') {
-            this.logger.debug('loggin failed');
             success = false;
           }
           else {
             // This cannot happend because login do a change of url
-            this.logger.debug('logging success');
             success = true;
           }
-          this.logger.debug(`canActivate(${route.toString()}) - END`);
           return success;
         })
       );
@@ -73,16 +66,14 @@ export class SgiAuthGuard implements CanActivate {
     try {
       result = this.checkAuthority(route);
     } catch (error) {
-      this.logger.error(error);
+      console.error(JSON.stringify(error));
       result = of(false);
     }
     // TODO: Check what to do when the user types a url and they don't have access to the requested route.
     //  - Redirect to /?
     //  - Redirect to a failsafe configured route in routeData?
     //  - Do nothing? (It's what currently happend)
-    return result.pipe(
-      tap(() => this.logger.debug(`canActivate(${route.toString()}) - END`))
-    );
+    return result;
 
   }
 

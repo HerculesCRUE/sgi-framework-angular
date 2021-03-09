@@ -2,7 +2,6 @@ import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { AuthInMemoryService } from './auth.inmemory.service';
-import { LoggerTestingModule } from 'ngx-logger/testing';
 import { Routes } from '@angular/router';
 
 describe('Auth.InmemoryService', () => {
@@ -12,7 +11,7 @@ describe('Auth.InmemoryService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [AuthInMemoryService],
-      imports: [LoggerTestingModule, RouterTestingModule.withRoutes(routes)]
+      imports: [RouterTestingModule.withRoutes(routes)]
     });
     service = TestBed.inject(AuthInMemoryService);
   });

@@ -1,19 +1,17 @@
-import { Observable, of, throwError } from 'rxjs';
-import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { switchMap, catchError, map, tap } from 'rxjs/operators';
-import { NGXLogger } from 'ngx-logger';
-import {
-  SgiRestFindOptions, SgiRestPageRequest, SgiRestSort, SgiRestSortDirection,
-  SgiRestFilter, SgiRestListResult, SgiRestFilterType
-} from './types';
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { SgiConverter } from '@sgi/framework/core';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import { SgiRestFilter } from './filter';
+import { SgiRestSort } from './sort';
+import { SgiRestFindOptions, SgiRestListResult, SgiRestPageRequest } from './types';
 
 
 /**
  * Base service to consume REST endpoints of read only entities with support for transformation
  *
  * Contains the common operations.
- * 
+ *
  * @template K type of ID
  * @template S type of rest response
  * @template T type of return element
@@ -25,22 +23,18 @@ export abstract class SgiReadOnlyMutableRestService<K extends number | string, S
   protected readonly endpointUrl: string;
   /** The converter for requests */
   protected readonly converter: SgiConverter<S, T>;
-  /** The logger */
-  protected readonly logger: NGXLogger;
   /** The Service Name to log */
   protected readonly serviceName: string;
 
   /**
    *
    * @param serviceName The service name to appear in log
-   * @param logger The logger to use
    * @param endpointRelativePath The endpoint relative URL path
    * @param http The HttpClient to use
    * @param converter The converter to use in transformations between rest response and returned type
    */
-  constructor(serviceName: string, logger: NGXLogger, endpointUrl: string, http: HttpClient, converter: SgiConverter<S, T>) {
+  constructor(serviceName: string, endpointUrl: string, http: HttpClient, converter: SgiConverter<S, T>) {
     this.serviceName = serviceName;
-    this.logger = logger;
     this.endpointUrl = endpointUrl;
     this.http = http;
     this.converter = converter;
@@ -53,17 +47,15 @@ export abstract class SgiReadOnlyMutableRestService<K extends number | string, S
    */
   // TODO: Manage 404 (NotFound) and return an empty element?
   public findById(id: K): Observable<T> {
-    this.logger.debug(this.serviceName, `findById(${id})`, '-', 'START');
     return this.http.get<S>(`${this.endpointUrl}/${id}`).pipe(
       // TODO: Explore the use a global HttpInterceptor with or without a custom error
       catchError((error: HttpErrorResponse) => {
         // Log the error
-        this.logger.error(this.serviceName, `findById(${id}):`, error);
+        console.error(JSON.stringify(error));
         // Pass the error to subscribers. Anyway they would decide what to do with the error.
         return throwError(error);
       }),
       map(response => {
-        this.logger.debug(this.serviceName, `findById(${id})`, '-', 'END');
         return this.converter.toTarget(response);
       })
     );
@@ -75,12 +67,7 @@ export abstract class SgiReadOnlyMutableRestService<K extends number | string, S
    * @param options The options to apply
    */
   public findAll(options?: SgiRestFindOptions): Observable<SgiRestListResult<T>> {
-    this.logger.debug(this.serviceName, `findAll(${options ? JSON.stringify(options) : ''})`, '-', 'START');
-    return this.find<S, T>(this.endpointUrl, options, this.converter).pipe(
-      tap(() => {
-        this.logger.debug(this.serviceName, `findAll(${options ? JSON.stringify(options) : ''})`, '-', 'END');
-      })
-    );
+    return this.find<S, T>(this.endpointUrl, options, this.converter);
   }
 
   /**
@@ -92,18 +79,14 @@ export abstract class SgiReadOnlyMutableRestService<K extends number | string, S
    */
   protected find<U, V>(endpointUrl: string, options?: SgiRestFindOptions, converter?: SgiConverter<U, V>):
     Observable<SgiRestListResult<V>> {
-    this.logger.debug(this.serviceName, `find(${endpointUrl}, ${options ? JSON.stringify(options) : ''})`, '-', 'START');
     return this.http.get<U[]>(endpointUrl, this.buildHttpClientOptions(options))
       .pipe(
         // TODO: Explore the use a global HttpInterceptor with or without a custom error
         catchError((error: HttpErrorResponse) => {
-          // Log the error
-          this.logger.error(this.serviceName, `find(${endpointUrl}, ${options ? JSON.stringify(options) : ''}):`, error);
           // Pass the error to subscribers. Anyway they would decide what to do with the error.
           return throwError(error);
         }),
         switchMap(r => {
-          this.logger.debug(this.serviceName, `find(${endpointUrl}, ${options ? JSON.stringify(options) : ''})`, '-', 'END');
           return this.toSgiRestListResult<U, V>(r, converter);
         })
       );
@@ -128,23 +111,19 @@ export abstract class SgiReadOnlyMutableRestService<K extends number | string, S
     return headers;
   }
 
-  private getSearchParam(sort: SgiRestSort, filters: SgiRestFilter[]): HttpParams {
+  private getSearchParam(sort: SgiRestSort, filter: SgiRestFilter): HttpParams {
     let param = new HttpParams();
-    const filterValues: string[] = [];
-    if (filters) {
-      filters.forEach((filter) => {
-        if (filter.field && filter.value && filter.type && filter.type !== SgiRestFilterType.NONE) {
-          filterValues.push(filter.field + filter.type.toString() + filter.value);
-        }
-      });
+    if (filter) {
+      const filterString = filter.toString();
+      if (filterString.length) {
+        param = param.append('q', filter.toString());
+      }
     }
-    if (filterValues.length > 0) {
-      param = param.append('q', filterValues.join(','));
-    }
-    // Sorting only is valid if al least a field is declared
-    if (sort && sort.field) {
-      // If no declared direction, then ASC is used
-      param = param.append('s', sort.field + (sort.direction ? sort.direction.toString() : SgiRestSortDirection.ASC));
+    if (sort) {
+      const sortString = sort.toString();
+      if (sortString.length) {
+        param = param.append('s', sort.toString());
+      }
     }
 
     return param;
@@ -166,7 +145,7 @@ export abstract class SgiReadOnlyMutableRestService<K extends number | string, S
   } {
     return {
       headers: this.getRequestHeaders(options?.page),
-      params: this.getSearchParam(options?.sort, options?.filters),
+      params: this.getSearchParam(options?.sort, options?.filter),
       observe: 'response'
     };
   }
