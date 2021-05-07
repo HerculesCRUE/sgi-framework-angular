@@ -127,7 +127,7 @@ export class RSQLSgiRestFilter implements SgiRestFilter {
 
   private getFixedValue(operator: SgiRestFilterOperator, value: string | string[]): string {
     if (operator === SgiRestFilterOperator.IS_NULL || operator === SgiRestFilterOperator.IS_NOT_NULL) {
-      return '';
+      return '""';
     }
 
     let fixedValue: string;
